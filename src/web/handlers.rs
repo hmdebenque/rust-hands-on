@@ -23,7 +23,7 @@ impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
             AppError::NotFound => (StatusCode::NOT_FOUND, "Todo not found"),
-            AppError::Storage(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg.leak()),
+            AppError::Storage(msg) => (StatusCode::INTERNAL_SERVER_ERROR, msg.leak() as &str),
         };
 
         (status, Json(json!({ "error": message }))).into_response()
