@@ -6,20 +6,8 @@ use axum::routing::post;
 use storage::memory::MemoryStorage;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-pub async fn start_server() {
-    tracing_subscriber::registry()
-        .with(fmt::layer())
-        .with(EnvFilter::from_env("MYAPP_LOG"))
-        .init();
 
-    tracing_subscriber::registry()
-        .with(
-            EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "app=debug,web=debug,tower_http=debug".into()),
-        )
-        .with(tracing_subscriber::fmt::layer())
-        .init();
-
+pub fn app() -> Router {
     // In-memory storage
     let storage = MemoryStorage::new();
 
@@ -30,6 +18,16 @@ pub async fn start_server() {
     // storage.init_schema().await.expect("Failed to initialize schema");
 
     let app = web::create_router(storage);
+    app
+}
+
+pub async fn start_server() {
+    tracing_subscriber::registry()
+        .with(fmt::layer())
+        .with(EnvFilter::from_env("MYAPP_LOG"))
+        .init();
+
+    let app = app();
 
     let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
