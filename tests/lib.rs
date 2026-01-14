@@ -1,24 +1,26 @@
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::response::Response;
+use axum::Router;
 use todo_api::app;
-use tower::ServiceExt;
 use todo_api::storage::Todo;
+use tower::{Service, ServiceExt};
 
 #[tokio::test]
 async fn test_create_todo_returns_201() {
     // given
-    let app = app();
+    let mut app = app();
     let req = Request::builder()
         .method("POST")
         .uri("/todos")
         .header("Content-Type", "application/json")
         .body(Body::from(r#"{"title": "Learn Rust"}"#))
         .unwrap();
-
+    // wait for app to be ready
+    <Router as ServiceExt<Request<Body>>>::ready(&mut app).await.unwrap();
 
     // when
-    let response = app.clone().oneshot(req).await.unwrap();
+    let response = app.call(req).await.unwrap();
 
     // then
     assert_eq!(response.status(), StatusCode::CREATED);
@@ -32,7 +34,7 @@ async fn test_create_todo_returns_201() {
         .uri(format!("/todos/{}", created_todo.id))
         .body(Body::empty())
         .unwrap();
-    let get_response = app.clone().oneshot(get_todo_req).await.unwrap();
+    let get_response = app.call(get_todo_req).await.unwrap();
 
     // then
     assert_eq!(get_response.status(), StatusCode::OK);
