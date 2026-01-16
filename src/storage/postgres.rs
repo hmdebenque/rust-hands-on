@@ -1,4 +1,4 @@
-use crate::{CreateTodo, Result, StorageError, Todo, TodoStorage, UpdateTodo};
+use super::{CreateTodo, Result, StorageError, Todo, TodoStorage, UpdateTodo};
 use async_trait::async_trait;
 use sqlx::PgPool;
 use uuid::Uuid;
@@ -34,19 +34,19 @@ impl TodoStorage for PostgresStorage {
     async fn create(&self, create: CreateTodo) -> Result<Todo> {
         let id = Uuid::new_v4();
 
-        sqlx::query_as!(
-            Todo,
+        sqlx::query_as::<_, Todo>(
             "INSERT INTO todos (id, title, completed) VALUES ($1, $2, false) RETURNING *",
-            id,
-            create.title
         )
+        .bind(id)
+        .bind(create.title)
         .fetch_one(&self.pool)
         .await
         .map_err(|e| StorageError::Database(e.to_string()))
     }
 
     async fn get(&self, id: Uuid) -> Result<Todo> {
-        sqlx::query_as!(Todo, "SELECT * FROM todos WHERE id = $1", id)
+        sqlx::query_as::<_, Todo>("SELECT * FROM todos WHERE id = $1")
+            .bind(id)
             .fetch_optional(&self.pool)
             .await
             .map_err(|e| StorageError::Database(e.to_string()))?
@@ -54,51 +54,56 @@ impl TodoStorage for PostgresStorage {
     }
 
     async fn list(&self) -> Result<Vec<Todo>> {
-        sqlx::query_as!(Todo, "SELECT * FROM todos ORDER BY title")
+        sqlx::query_as::<_, Todo>("SELECT * FROM todos ORDER BY title")
             .fetch_all(&self.pool)
             .await
             .map_err(|e| StorageError::Database(e.to_string()))
     }
 
     async fn update(&self, id: Uuid, update: UpdateTodo) -> Result<Todo> {
-        let mut query = String::from("UPDATE todos SET ");
-        let mut updates = Vec::new();
-        let mut param_count = 1;
-
-        if update.title.is_some() {
-            updates.push(format!("title = ${}", param_count));
-            param_count += 1;
+        // Handle different update combinations with fixed queries
+        match (update.title, update.completed) {
+            (None, None) => self.get(id).await,
+            (Some(title), None) => {
+                sqlx::query_as::<_, Todo>(
+                    "UPDATE todos SET title = $1 WHERE id = $2 RETURNING *",
+                )
+                .bind(title)
+                .bind(id)
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(|e| StorageError::Database(e.to_string()))?
+                .ok_or(StorageError::NotFound)
+            }
+            (None, Some(completed)) => {
+                sqlx::query_as::<_, Todo>(
+                    "UPDATE todos SET completed = $1 WHERE id = $2 RETURNING *",
+                )
+                .bind(completed)
+                .bind(id)
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(|e| StorageError::Database(e.to_string()))?
+                .ok_or(StorageError::NotFound)
+            }
+            (Some(title), Some(completed)) => {
+                sqlx::query_as::<_, Todo>(
+                    "UPDATE todos SET title = $1, completed = $2 WHERE id = $3 RETURNING *",
+                )
+                .bind(title)
+                .bind(completed)
+                .bind(id)
+                .fetch_optional(&self.pool)
+                .await
+                .map_err(|e| StorageError::Database(e.to_string()))?
+                .ok_or(StorageError::NotFound)
+            }
         }
-        if update.completed.is_some() {
-            updates.push(format!("completed = ${}", param_count));
-            param_count += 1;
-        }
-
-        if updates.is_empty() {
-            return self.get(id).await;
-        }
-
-        query.push_str(&updates.join(", "));
-        query.push_str(&format!(" WHERE id = ${} RETURNING *", param_count));
-
-        let mut q = sqlx::query_as::<_, Todo>(&query);
-
-        if let Some(title) = update.title {
-            q = q.bind(title);
-        }
-        if let Some(completed) = update.completed {
-            q = q.bind(completed);
-        }
-        q = q.bind(id);
-
-        q.fetch_optional(&self.pool)
-            .await
-            .map_err(|e| StorageError::Database(e.to_string()))?
-            .ok_or(StorageError::NotFound)
     }
 
     async fn delete(&self, id: Uuid) -> Result<()> {
-        let result = sqlx::query!("DELETE FROM todos WHERE id = $1", id)
+        let result = sqlx::query("DELETE FROM todos WHERE id = $1")
+            .bind(id)
             .execute(&self.pool)
             .await
             .map_err(|e| StorageError::Database(e.to_string()))?;

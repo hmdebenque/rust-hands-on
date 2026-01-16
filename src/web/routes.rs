@@ -12,7 +12,7 @@ pub fn create_router<S: TodoStorage + Clone + 'static>(storage: S) -> Router {
     Router::new()
         .route("/todos", post(create_todo::<S>).get(list_todos::<S>))
         .route(
-            "/todos/:id",
+            "/todos/{id}",
             get(get_todo::<S>)
                 .patch(update_todo::<S>)
                 .delete(delete_todo::<S>),

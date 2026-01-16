@@ -1,6 +1,8 @@
 pub mod storage;
 pub mod web;
 
+pub use web::create_router;
+
 use axum::Router;
 use axum::routing::post;
 use storage::memory::MemoryStorage;

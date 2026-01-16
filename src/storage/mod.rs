@@ -4,6 +4,7 @@ use std::fmt::Debug;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[cfg_attr(feature = "postgres", derive(sqlx::FromRow))]
 pub struct Todo {
     pub id: Uuid,
     pub title: String,
