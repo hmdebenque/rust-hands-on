@@ -1,5 +1,7 @@
 .PHONY: build build-postgres build-all test test-postgres test-all check clippy fmt clean \
-        migrate migrate-create migrate-revert migrate-info sqlx-prepare
+        migrate migrate-create migrate-revert migrate-info sqlx-prepare \
+        docker-build docker-build-postgres docker-run \
+        compose-up compose-down compose-logs compose-build
 
 # Build commands
 build:
@@ -53,6 +55,29 @@ migrate-info:
 
 sqlx-prepare:
 	cargo sqlx prepare --workspace
+
+# Docker
+docker-build:
+	docker build -t todo_api .
+
+docker-build-postgres:
+	docker build --build-arg FEATURES=postgres -t todo_api:postgres .
+
+docker-run:
+	docker run -p 3000:3000 todo_api
+
+# Docker Compose
+compose-up:
+	docker compose up -d
+
+compose-down:
+	docker compose down
+
+compose-logs:
+	docker compose logs -f
+
+compose-build:
+	docker compose build
 
 # Clean
 clean:

@@ -9,7 +9,7 @@ use tower::{Service, ServiceExt};
 #[tokio::test]
 async fn test_create_todo_returns_201() {
     // given
-    let mut app = app();
+    let mut app = app().await;
     let req = Request::builder()
         .method("POST")
         .uri("/todos")
