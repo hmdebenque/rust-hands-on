@@ -15,7 +15,7 @@ pub fn app() -> Router {
     // let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     // let pool = sqlx::PgPool::connect(&database_url).await.expect("Failed to connect to Postgres");
     // let storage = storage::postgres::PostgresStorage::new(pool);
-    // storage.init_schema().await.expect("Failed to initialize schema");
+    // storage.run_migrations().await.expect("Failed to run migrations");
 
     let app = web::create_router(storage);
     app

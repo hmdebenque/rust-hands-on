@@ -13,19 +13,10 @@ impl PostgresStorage {
         Self { pool }
     }
 
-    pub async fn init_schema(&self) -> sqlx::Result<()> {
-        sqlx::query(
-            r#"
-            CREATE TABLE IF NOT EXISTS todos (
-                id UUID PRIMARY KEY,
-                title TEXT NOT NULL,
-                completed BOOLEAN NOT NULL DEFAULT FALSE
-            )
-            "#,
-        )
-        .execute(&self.pool)
-        .await?;
-        Ok(())
+    /// Run all pending database migrations.
+    /// Migrations are embedded at compile time from the `migrations/` directory.
+    pub async fn run_migrations(&self) -> std::result::Result<(), sqlx::migrate::MigrateError> {
+        sqlx::migrate!("./migrations").run(&self.pool).await
     }
 }
 

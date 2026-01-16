@@ -1,4 +1,5 @@
-.PHONY: build build-postgres build-all test test-postgres test-all check clippy fmt clean
+.PHONY: build build-postgres build-all test test-postgres test-all check clippy fmt clean \
+        migrate migrate-create migrate-revert migrate-info sqlx-prepare
 
 # Build commands
 build:
@@ -35,6 +36,23 @@ fmt:
 
 fmt-check:
 	cargo fmt -- --check
+
+# Database migrations (requires: cargo install sqlx-cli)
+migrate:
+	sqlx migrate run
+
+migrate-create:
+	@read -p "Migration name: " name; \
+	sqlx migrate add -r $$name
+
+migrate-revert:
+	sqlx migrate revert
+
+migrate-info:
+	sqlx migrate info
+
+sqlx-prepare:
+	cargo sqlx prepare --workspace
 
 # Clean
 clean:

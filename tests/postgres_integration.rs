@@ -48,9 +48,9 @@ async fn setup_postgres_storage() -> (PostgresStorage, ContainerAsync<Postgres>)
 
     let storage = PostgresStorage::new(pool);
     storage
-        .init_schema()
+        .run_migrations()
         .await
-        .expect("Failed to initialize schema");
+        .expect("Failed to run migrations");
 
     (storage, container)
 }
