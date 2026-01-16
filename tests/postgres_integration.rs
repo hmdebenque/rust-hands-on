@@ -4,16 +4,16 @@
 
 #![cfg(feature = "postgres")]
 
+use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::response::Response;
-use axum::Router;
 use sqlx::PgPool;
 use testcontainers::ContainerAsync;
 use testcontainers_modules::{postgres::Postgres, testcontainers::runners::AsyncRunner};
 use todo_api::create_router;
-use todo_api::storage::postgres::PostgresStorage;
 use todo_api::storage::Todo;
+use todo_api::storage::postgres::PostgresStorage;
 use tower::{Service, ServiceExt};
 
 async fn read_todo_response(response: Response) -> Todo {

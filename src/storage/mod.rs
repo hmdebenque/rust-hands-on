@@ -41,6 +41,7 @@ pub trait TodoStorage: Send + Sync {
     async fn delete(&self, id: Uuid) -> Result<()>;
 }
 
+#[cfg(feature = "in_memory")]
 pub mod memory;
 
 #[cfg(feature = "postgres")]

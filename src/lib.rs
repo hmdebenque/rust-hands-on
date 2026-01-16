@@ -4,10 +4,8 @@ pub mod web;
 pub use web::create_router;
 
 use axum::Router;
-use axum::routing::post;
 use storage::memory::MemoryStorage;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
-
 
 pub fn app() -> Router {
     // In-memory storage

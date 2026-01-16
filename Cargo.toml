@@ -22,5 +22,6 @@ testcontainers = "0.26.3"
 testcontainers-modules = { version = "0.14.0", features = ["postgres"] }
 
 [features]
-default = []
+default = ["in_memory"]
+in_memory = []
 postgres = []

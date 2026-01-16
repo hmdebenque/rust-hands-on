@@ -1,7 +1,7 @@
+use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::response::Response;
-use axum::Router;
 use todo_api::app;
 use todo_api::storage::Todo;
 use tower::{Service, ServiceExt};
@@ -17,7 +17,9 @@ async fn test_create_todo_returns_201() {
         .body(Body::from(r#"{"title": "Learn Rust"}"#))
         .unwrap();
     // wait for app to be ready
-    <Router as ServiceExt<Request<Body>>>::ready(&mut app).await.unwrap();
+    <Router as ServiceExt<Request<Body>>>::ready(&mut app)
+        .await
+        .unwrap();
 
     // when
     let response = app.call(req).await.unwrap();

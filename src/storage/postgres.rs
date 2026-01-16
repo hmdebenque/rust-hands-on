@@ -65,39 +65,33 @@ impl TodoStorage for PostgresStorage {
         match (update.title, update.completed) {
             (None, None) => self.get(id).await,
             (Some(title), None) => {
-                sqlx::query_as::<_, Todo>(
-                    "UPDATE todos SET title = $1 WHERE id = $2 RETURNING *",
-                )
-                .bind(title)
-                .bind(id)
-                .fetch_optional(&self.pool)
-                .await
-                .map_err(|e| StorageError::Database(e.to_string()))?
-                .ok_or(StorageError::NotFound)
+                sqlx::query_as::<_, Todo>("UPDATE todos SET title = $1 WHERE id = $2 RETURNING *")
+                    .bind(title)
+                    .bind(id)
+                    .fetch_optional(&self.pool)
+                    .await
+                    .map_err(|e| StorageError::Database(e.to_string()))?
+                    .ok_or(StorageError::NotFound)
             }
-            (None, Some(completed)) => {
-                sqlx::query_as::<_, Todo>(
-                    "UPDATE todos SET completed = $1 WHERE id = $2 RETURNING *",
-                )
-                .bind(completed)
-                .bind(id)
-                .fetch_optional(&self.pool)
-                .await
-                .map_err(|e| StorageError::Database(e.to_string()))?
-                .ok_or(StorageError::NotFound)
-            }
-            (Some(title), Some(completed)) => {
-                sqlx::query_as::<_, Todo>(
-                    "UPDATE todos SET title = $1, completed = $2 WHERE id = $3 RETURNING *",
-                )
-                .bind(title)
-                .bind(completed)
-                .bind(id)
-                .fetch_optional(&self.pool)
-                .await
-                .map_err(|e| StorageError::Database(e.to_string()))?
-                .ok_or(StorageError::NotFound)
-            }
+            (None, Some(completed)) => sqlx::query_as::<_, Todo>(
+                "UPDATE todos SET completed = $1 WHERE id = $2 RETURNING *",
+            )
+            .bind(completed)
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(|e| StorageError::Database(e.to_string()))?
+            .ok_or(StorageError::NotFound),
+            (Some(title), Some(completed)) => sqlx::query_as::<_, Todo>(
+                "UPDATE todos SET title = $1, completed = $2 WHERE id = $3 RETURNING *",
+            )
+            .bind(title)
+            .bind(completed)
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(|e| StorageError::Database(e.to_string()))?
+            .ok_or(StorageError::NotFound),
         }
     }
 
