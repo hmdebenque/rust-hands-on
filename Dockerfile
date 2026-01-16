@@ -20,7 +20,7 @@ COPY --from=builder /usr/src/app/migrations /app/migrations
 WORKDIR /app
 
 ENV RUST_LOG=info
-ENV MYAPP_LOG=info
+ENV RUST_BACKTRACE=1
 
 EXPOSE 3000
 
