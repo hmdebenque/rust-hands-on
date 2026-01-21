@@ -22,3 +22,7 @@ Create entry point and test modules.
 1. Add the routes in the router
 2. Implement routes logic
 3. Implement storage logic
+
+## Step 4 - Use Postgres DB
+
+Fill the todo to make tests pass

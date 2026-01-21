@@ -13,9 +13,10 @@ serde = { version = "1.0.228", features = ["derive"] }
 uuid = { version = "1", features = ["v4", "serde"] }
 thiserror = "2.0.18"
 async-trait = "0.1.89"
+sqlx = { version = "0.9.0-alpha.1", features = ["runtime-tokio", "postgres", "uuid", "migrate"] }
 serde_json = "1.0.149"
 
-[features]
-default = ["in_memory"]
-in_memory = []
-postgres = []
+
+[dev-dependencies]
+testcontainers = "0.26"
+testcontainers-modules = { version = "0.14", features = ["postgres"] }

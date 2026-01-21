@@ -5,14 +5,14 @@ use axum::Router;
 use axum::body::Body;
 use axum::http::{Request, StatusCode};
 use axum::response::Response;
-use todo_api::app;
+use todo_api::app_in_memory;
 use tower::{Service, ServiceExt};
 use todo_api::data_types::Todo;
 
 #[tokio::test]
 async fn test_health_returns_200() {
     // given
-    let mut app = app().await;
+    let mut app = app_in_memory().await;
     let req = Request::builder()
         .method("GET")
         .uri("/health")
@@ -40,7 +40,7 @@ async fn read_resp_todo(response: Response) -> Todo {
 #[tokio::test]
 async fn test_create_todo_returns_201() {
     // given
-    let mut app = app().await;
+    let mut app = app_in_memory().await;
     let req = Request::builder()
         .method("POST")
         .uri("/todos")
