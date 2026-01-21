@@ -10,3 +10,9 @@ cargo init
 Doc: https://doc.rust-lang.org/cargo/commands/cargo-init.html
 
 Create entry point and test modules.
+
+## Step 2 - Bootstrap web server
+
+1. Create the Axum router
+2. Create the health endpoint
+3. Test the health endpoint
