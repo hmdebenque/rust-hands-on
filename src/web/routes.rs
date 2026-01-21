@@ -1,5 +1,5 @@
 use crate::storage::TodoStorage;
-use crate::web::handlers::{AppState, create_todo, delete_todo, get_todo, list_todos, update_todo};
+use crate::web::handlers::{AppState, create_todo, delete_todo, get_todo, health, list_todos, update_todo};
 use axum::{
     Router,
     routing::{get, post},
@@ -10,6 +10,7 @@ pub fn create_router<S: TodoStorage + Clone + 'static>(storage: S) -> Router {
     let state = AppState { storage };
 
     Router::new()
+        .route("/health", get(health))
         .route("/todos", post(create_todo::<S>).get(list_todos::<S>))
         .route(
             "/todos/{id}",

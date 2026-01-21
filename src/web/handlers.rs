@@ -77,3 +77,7 @@ pub async fn delete_todo<S: TodoStorage>(
     state.storage.delete(id).await?;
     Ok(StatusCode::NO_CONTENT)
 }
+
+pub async fn health() -> StatusCode {
+    StatusCode::OK
+}
