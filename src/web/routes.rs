@@ -1,10 +1,22 @@
-use crate::web::handlers::health;
+use crate::web::handlers::{create_todo, get_todo, health};
 use axum::{
-    routing::get,
     Router,
+    routing::{get, post},
 };
+use crate::storage::TodoStorage;
 
-pub fn create_router() -> Router {
+#[derive(Clone)]
+pub struct AppState<S: TodoStorage> {
+    pub storage: S,
+}
+
+pub enum AppError {
+    NotFound,
+    Storage(String),
+}
+
+pub fn create_router<S: TodoStorage + Clone + 'static>(storage: S) -> Router {
+    // todo: add state and routes
     Router::new()
         .route("/health", get(health))
 }
