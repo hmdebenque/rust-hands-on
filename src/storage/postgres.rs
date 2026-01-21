@@ -23,10 +23,24 @@ impl PostgresStorage {
 #[async_trait]
 impl TodoStorage for PostgresStorage {
     async fn create(&self, create: CreateTodo) -> Result<Todo> {
-        todo!()
+        let id = Uuid::new_v4();
+
+        sqlx::query_as::<_, Todo>(
+            "INSERT INTO todos (id, title, completed) VALUES ($1, $2, false) RETURNING *",
+        )
+        .bind(id)
+        .bind(create.title)
+        .fetch_one(&self.pool)
+        .await
+        .map_err(|e| StorageError::Database(e.to_string()))
     }
 
     async fn get(&self, id: Uuid) -> Result<Todo> {
-        todo!()
+        sqlx::query_as::<_, Todo>("SELECT * FROM todos WHERE id = $1")
+            .bind(id)
+            .fetch_optional(&self.pool)
+            .await
+            .map_err(|e| StorageError::Database(e.to_string()))?
+            .ok_or(StorageError::NotFound)
     }
 }
