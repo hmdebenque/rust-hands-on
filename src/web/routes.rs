@@ -16,7 +16,12 @@ pub enum AppError {
 }
 
 pub fn create_router<S: TodoStorage + Clone + 'static>(storage: S) -> Router {
-    // todo: add state and routes
+    let state = AppState { storage };
+
     Router::new()
         .route("/health", get(health))
+        .route("/todos", post(create_todo::<S>))
+        .route("/todos/{id}", get(get_todo::<S>)
+        )
+        .with_state(state)
 }

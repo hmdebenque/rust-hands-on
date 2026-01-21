@@ -39,12 +39,14 @@ pub async fn create_todo<S: TodoStorage>(
     State(state): State<AppState<S>>,
     Json(create): Json<CreateTodo>,
 ) -> Result<(StatusCode, Json<Todo>), AppError> {
-    todo!()
+    let todo = state.storage.create(create).await?;
+    Ok((StatusCode::CREATED, Json(todo)))
 }
 
 pub async fn get_todo<S: TodoStorage>(
     State(state): State<AppState<S>>,
     Path(id): Path<Uuid>,
 ) -> Result<Json<Todo>, AppError> {
-    todo!()
+    let todo = state.storage.get(id).await?;
+    Ok(Json(todo))
 }

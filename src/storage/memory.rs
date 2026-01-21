@@ -27,10 +27,20 @@ impl Default for MemoryStorage {
 #[async_trait]
 impl TodoStorage for MemoryStorage {
     async fn create(&self, create: CreateTodo) -> Result<Todo> {
-        todo!()
+        let todo = Todo {
+            id: Uuid::new_v4(),
+            title: create.title,
+            completed: false,
+        };
+
+        let mut todos = self.todos.write().await;
+        todos.insert(todo.id, todo.clone());
+
+        Ok(todo)
     }
 
     async fn get(&self, id: Uuid) -> Result<Todo> {
-        todo!()
+        let todos = self.todos.read().await;
+        todos.get(&id).cloned().ok_or(StorageError::NotFound)
     }
 }
